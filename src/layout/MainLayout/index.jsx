@@ -17,6 +17,7 @@ import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 
 import useConfig from 'hooks/useConfig';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
+import Loading from '../../ui-component/Loading';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -42,6 +43,7 @@ export default function MainLayout() {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <Loading />
       {/* header */}
       <AppBar enableColorOnDark position="fixed" color="inherit" elevation={0} sx={{ bgcolor: 'background.default' }}>
         <Toolbar sx={{ p: 2 }}>

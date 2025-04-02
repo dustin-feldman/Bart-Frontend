@@ -28,6 +28,8 @@ import { visuallyHidden } from '@mui/utils';
 
 import CreateVS from './createVS';
 import { useVSContext } from '../../../context/VSContext';
+import { useDispatch } from 'react-redux';
+import { hideLoading, showLoading } from '../../../store/loadingSlice';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -40,9 +42,7 @@ function descendingComparator(a, b, orderBy) {
 }
 
 function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
+  return order === 'desc' ? (a, b) => descendingComparator(a, b, orderBy) : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
 const headCells = [
@@ -50,25 +50,24 @@ const headCells = [
     id: 'name',
     numeric: false,
     disablePadding: true,
-    label: 'Store Name',
+    label: 'Store Name'
   },
   {
     id: 'files',
     numeric: false,
     disablePadding: false,
-    label: 'Files',
+    label: 'Files'
   },
   {
     id: 'edit',
     numeric: true,
     disablePadding: true,
-    label: '',
+    label: ''
   }
 ];
 
 function EnhancedTableHead(props) {
-  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } =
-    props;
+  const { onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   };
@@ -83,7 +82,7 @@ function EnhancedTableHead(props) {
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{
-              'aria-label': 'select all desserts',
+              'aria-label': 'select all desserts'
             }}
           />
         </TableCell>
@@ -119,7 +118,7 @@ EnhancedTableHead.propTypes = {
   onSelectAllClick: PropTypes.func.isRequired,
   order: PropTypes.oneOf(['asc', 'desc']).isRequired,
   orderBy: PropTypes.string.isRequired,
-  rowCount: PropTypes.number.isRequired,
+  rowCount: PropTypes.number.isRequired
 };
 
 function EnhancedTableToolbar(props) {
@@ -130,7 +129,7 @@ function EnhancedTableToolbar(props) {
 
   const createNewVS = () => {
     setNewDialog(true);
-  }
+  };
 
   const deleteVS = async () => {
     try {
@@ -139,11 +138,11 @@ function EnhancedTableToolbar(props) {
       }
 
       const response = await fetch(`${import.meta.env.VITE_API_END_POINT}/delete`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ids: selected }),
+        body: JSON.stringify({ ids: selected })
       });
 
       if (!response.ok) {
@@ -151,51 +150,39 @@ function EnhancedTableToolbar(props) {
       }
 
       const data = await response.json();
-      dispatch({ type: "DELETE_VS_SUCCESS", payload: data.deleted_ids });
-
+      dispatch({ type: 'DELETE_VS_SUCCESS', payload: data.deleted_ids });
     } catch (error) {
-      console.error("Error deleting vector stores:", error);
+      console.error('Error deleting vector stores:', error);
     }
-  }
+  };
 
   const searchVS = async () => {
-    localStorage.setItem("selectedVSIds", JSON.stringify(selected));
+    localStorage.setItem('selectedVSIds', JSON.stringify(selected));
     navigate(`/search`);
-  }
+  };
 
   const closeDialog = () => {
     setNewDialog(false);
-  }
+  };
 
   return (
     <Toolbar
       sx={[
         {
           pl: { sm: 2 },
-          pr: { xs: 1, sm: 1 },
+          pr: { xs: 1, sm: 1 }
         },
         numSelected > 0 && {
-          bgcolor: (theme) =>
-            alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity),
-        },
+          bgcolor: (theme) => alpha(theme.palette.primary.main, theme.palette.action.activatedOpacity)
+        }
       ]}
     >
       {numSelected > 0 ? (
-        <Typography
-          sx={{ flex: '1 1 100%' }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
+        <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle1" component="div">
           {numSelected} selected
         </Typography>
       ) : (
-        <Typography
-          sx={{ flex: '1 1 100%' }}
-          variant="h2"
-          id="tableTitle"
-          component="div"
-        >
+        <Typography sx={{ flex: '1 1 100%' }} variant="h2" id="tableTitle" component="div">
           Vector Store List
         </Typography>
       )}
@@ -233,18 +220,22 @@ export default function Dashboard() {
   const [isLoading, setLoading] = useState(true);
   const { state, dispatch } = useVSContext();
   const navigate = useNavigate();
+  const originDispatch = useDispatch();
 
   useEffect(() => {
     const fetchVectorStores = async () => {
+      originDispatch(showLoading());
       try {
         const response = await fetch(`${import.meta.env.VITE_API_END_POINT}`);
         if (!response.ok) {
-          throw new Error("Failed to fetch vector stores");
+          throw new Error('Failed to fetch vector stores');
         }
         const data = await response.json();
-        dispatch({ type: "FETCH_ALL_VS_SUCCESS", payload: data['vector_stores'] });
+        dispatch({ type: 'FETCH_ALL_VS_SUCCESS', payload: data['vector_stores'] });
       } catch (error) {
         console.log(error.message);
+      } finally {
+        originDispatch(hideLoading());
       }
     };
 
@@ -283,10 +274,7 @@ export default function Dashboard() {
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
     } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
+      newSelected = newSelected.concat(selected.slice(0, selectedIndex), selected.slice(selectedIndex + 1));
     }
     setSelected(newSelected);
   };
@@ -302,18 +290,14 @@ export default function Dashboard() {
 
   const editVS = (id) => {
     navigate(`/edit/${id}`);
-  }
+  };
 
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - state.vector_stores.length) : 0;
+  const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - state.vector_stores.length) : 0;
 
   const visibleRows = React.useMemo(
-    () =>
-      [...state.vector_stores]
-        .sort(getComparator(order, orderBy))
-        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
-    [state.vector_stores, order, orderBy, page, rowsPerPage],
+    () => [...state.vector_stores].sort(getComparator(order, orderBy)).slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
+    [state.vector_stores, order, orderBy, page, rowsPerPage]
   );
 
   return (
@@ -323,11 +307,7 @@ export default function Dashboard() {
           <Paper sx={{ width: '100%', mb: 2 }}>
             <EnhancedTableToolbar numSelected={selected.length} selected={selected} />
             <TableContainer>
-              <Table
-                sx={{ minWidth: 750 }}
-                aria-labelledby="tableTitle"
-                size='medium'
-              >
+              <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="medium">
                 <EnhancedTableHead
                   numSelected={selected.length}
                   order={order}
@@ -357,35 +337,28 @@ export default function Dashboard() {
                             checked={isItemSelected}
                             onClick={(event) => handleClick(event, row.store_id)}
                             inputProps={{
-                              'aria-labelledby': labelId,
+                              'aria-labelledby': labelId
                             }}
                           />
                         </TableCell>
-                        <TableCell
-                          component="th"
-                          id={labelId}
-                          scope="row"
-                          padding="none"
-                        >
+                        <TableCell component="th" id={labelId} scope="row" padding="none">
                           {row.store_name}
                         </TableCell>
                         <TableCell align="left">
-                          {
-                            row.files.map((file) => (
-                              <span
-                                key={file.file_id}
-                                style={{
-                                  display: 'inline-block',
-                                  backgroundColor: '#CCC',
-                                  padding: '4px 8px',
-                                  borderRadius: '16px / 50%',
-                                  marginRight: '4px'
-                                }}
-                              >
-                                {file.filename}
-                              </span>
-                            ))
-                          }
+                          {row.files.map((file) => (
+                            <span
+                              key={file.file_id}
+                              style={{
+                                display: 'inline-block',
+                                backgroundColor: '#CCC',
+                                padding: '4px 8px',
+                                borderRadius: '16px / 50%',
+                                marginRight: '4px'
+                              }}
+                            >
+                              {file.filename}
+                            </span>
+                          ))}
                         </TableCell>
                         <TableCell align="right">
                           <Tooltip title="Edit">
@@ -400,7 +373,7 @@ export default function Dashboard() {
                   {emptyRows > 0 && (
                     <TableRow
                       style={{
-                        height: 53 * emptyRows,
+                        height: 53 * emptyRows
                       }}
                     >
                       <TableCell colSpan={6} />
