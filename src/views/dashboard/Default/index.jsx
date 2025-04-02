@@ -226,7 +226,7 @@ export default function Dashboard() {
     const fetchVectorStores = async () => {
       originDispatch(showLoading());
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_END_POINT}`);
+        const response = await fetch(`${import.meta.env.VITE_API_END_POINT}/store_list`);
         if (!response.ok) {
           throw new Error('Failed to fetch vector stores');
         }
