@@ -10,7 +10,10 @@ import {
   TableRow,
   IconButton,
   Collapse,
-  Paper
+  Paper,
+  List,
+  ListItem,
+  ListItemText
 } from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -42,22 +45,36 @@ function Row({ row }) {
               <Table size="small" aria-label="query-results">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total Price ($)</TableCell>
+                    <TableCell>Query Id</TableCell>
+                    <TableCell>Query Name</TableCell>
+                    <TableCell>Query Result</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.queryResults.length > 0 ? (
-                    row.queryResults.map((result) => (
+                  {row.query_results.length > 0 ? (
+                    row.query_results.map((result) => (
                       <TableRow key={result.id}>
                         <TableCell component="th" scope="row">
-                          {result.date}
+                          {result.id}
                         </TableCell>
-                        <TableCell>{result.customer}</TableCell>
-                        <TableCell align="right">{result.amount}</TableCell>
-                        <TableCell align="right">{Math.round(result.amount * row.price * 100) / 100}</TableCell>
+                        <TableCell>{result.query_name}</TableCell>
+                        <TableCell>
+                          {result.result.includes('\n') ? (
+                            <List dense>
+                              {result.result
+                                .split('\n')
+                                .map((item, index) => item.replace(/^-\s*/, '')) // Remove leading '- '
+                                .filter(Boolean)
+                                .map((point, index) => (
+                                  <ListItem key={index} disablePadding>
+                                    <ListItemText primary={`• ${point}`} />
+                                  </ListItem>
+                                ))}
+                            </List>
+                          ) : (
+                            result.result
+                          )}
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
@@ -94,7 +111,7 @@ export default function QueryResultRightPanel({ selectedFiles }) {
           </TableHead>
           <TableBody>
             {selectedFiles.map((folder) =>
-              folder.files.map((file) => <Row key={file.id} row={{ ...file, queryResults: file.queryResults || [] }} />)
+              folder.files.map((file) => <Row key={file.id} row={{ ...file, query_results: file.query_results || [] }} />)
             )}
           </TableBody>
         </Table>

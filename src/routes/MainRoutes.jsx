@@ -3,9 +3,6 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
-import ManageFiles from '../views/dashboard/manage-files';
-import FolderTreeView from '../views/dashboard/manage-files/FolderTreeView';
-import QueryResult from '../views/dashboard/manage-files/QueryResult';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -19,6 +16,9 @@ const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
 
 // sample page routing
 const SamplePage = Loadable(lazy(() => import('views/sample-page')));
+const PromptPage = Loadable(lazy(() => import('views/prompts')));
+const ManageFiles = Loadable(lazy(() => import('views/dashboard/manage-files')));
+const QueryResult = Loadable(lazy(() => import('views/dashboard/manage-files/QueryResult')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -61,6 +61,10 @@ const MainRoutes = {
     {
       path: '/vector-stores',
       element: <QueryResult />
+    },
+    {
+      path: '/prompts',
+      element: <PromptPage />
     }
   ]
 };
