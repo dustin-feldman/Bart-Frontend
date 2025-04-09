@@ -18,6 +18,9 @@ import Breadcrumbs from 'ui-component/extended/Breadcrumbs';
 import useConfig from 'hooks/useConfig';
 import { handlerDrawerOpen, useGetMenuMaster } from 'api/menu';
 import Loading from '../../ui-component/Loading';
+import { useSelector, useDispatch } from 'react-redux';
+import { hideSnackbar } from '../../store/snackbarSlice';
+import { Alert, Snackbar } from '@mui/material';
 
 // ==============================|| MAIN LAYOUT ||============================== //
 
@@ -27,6 +30,10 @@ export default function MainLayout() {
 
   const { borderRadius, miniDrawer } = useConfig();
   const { menuMaster, menuMasterLoading } = useGetMenuMaster();
+
+  const dispatch = useDispatch();
+  const snackbar = useSelector((state) => state.snackbar);
+
   const drawerOpen = menuMaster?.isDashboardDrawerOpened;
 
   useEffect(() => {
@@ -62,6 +69,17 @@ export default function MainLayout() {
           <Outlet />
         </Box>
       </MainContentStyled>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => dispatch(hideSnackbar())}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={() => dispatch(hideSnackbar())} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

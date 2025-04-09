@@ -2,12 +2,12 @@ import PropTypes from 'prop-types';
 import { createContext } from 'react';
 
 // project imports
-import defaultConfig from 'config';
 import useLocalStorage from 'hooks/useLocalStorage';
+import config from '../config';
 
 // initial state
 const initialState = {
-  ...defaultConfig,
+  ...config.defaultConfig,
   onChangeFontFamily: () => {},
   onChangeBorderRadius: () => {},
   onReset: () => {}

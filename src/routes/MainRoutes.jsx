@@ -3,6 +3,9 @@ import { lazy } from 'react';
 // project imports
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
+import ManageFiles from '../views/dashboard/manage-files';
+import FolderTreeView from '../views/dashboard/manage-files/FolderTreeView';
+import QueryResult from '../views/dashboard/manage-files/QueryResult';
 
 // dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -50,6 +53,14 @@ const MainRoutes = {
     {
       path: '/sample-page',
       element: <SamplePage />
+    },
+    {
+      path: '/upload-files',
+      element: <ManageFiles />
+    },
+    {
+      path: '/vector-stores',
+      element: <QueryResult />
     }
   ]
 };
