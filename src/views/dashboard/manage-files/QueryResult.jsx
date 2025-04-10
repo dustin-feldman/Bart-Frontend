@@ -11,13 +11,18 @@ import {
   DialogContentText,
   DialogActions,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  LinearProgress
 } from '@mui/material';
 import FolderTreeView from './FolderTreeView'; // Import FolderTreeView component
 import axiosInstance from '../../../axiosInstance';
 import QueryResultRightPanel from './QueryResultRightPanel'; // Import the right panel component
+import moment from 'moment';
+import { useTheme } from '@mui/material/styles';
 
 export default function QueryResult() {
+  const theme = useTheme();  // Access the theme object
+
   const [selectedFiles, setSelectedFiles] = useState({});
   const [folders, setFolders] = useState([]);
   const [queues, setQueues] = useState([]);
@@ -146,6 +151,44 @@ export default function QueryResult() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      // Get the selected file IDs
+      const selectedFileIds = filteredFiles.flatMap((folder) => folder.files.map((file) => file.id));
+
+      // Make the POST request to generate the CSV
+      const response = await axiosInstance.post(
+        '/api/export/',
+        {
+          file_ids: selectedFileIds // Send the file IDs in the body of the request
+        },
+        {
+          responseType: 'blob' // Ensure the response is a binary file (CSV)
+        }
+      );
+
+      // Create a Blob from the CSV data in the response
+      const blob = new Blob([response.data], { type: 'text/csv' });
+
+      // Create a link element to trigger the download
+      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+
+      const currentDate = moment().format('MM-DD-YYYY');
+
+      link.download = `file_query_results_${currentDate}.csv`; // The name of the downloaded file
+
+      // Programmatically click the link to trigger the download
+      link.click();
+
+      // Clean up the object URL after the download
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+    }
+  };
+
   // Assuming the state for folders and selectedFiles are available in the component
   const filteredFiles = useMemo(() => {
     return folders.reduce((result, folder) => {
@@ -185,10 +228,33 @@ export default function QueryResult() {
         {/* Right side: Query Result and Selected File List */}
         <Grid item xs={12} lg={6}>
           {queues.length > 0 ? (
-            <Stack spacing={1}>
-              <Typography variant="body2" align="center">
-                Queue: {total} | ✅ Completed: {completed} | ❌ Failed: {failed}
-              </Typography>
+            <Stack>
+              <Box sx={{ position: 'relative', width: '100%', padding: 0, margin: 0 }}>
+                {/* Progress text */}
+                <Typography
+                  align="center"
+                  sx={{
+                    position: 'absolute',
+                    top: '30%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 1, // Ensures text is on top
+                    color: 'white', // Optional: Change text color for better visibility
+                    backgroundColor: theme.palette.primary.main, // Set background to primary color
+                  }}
+                >
+                  Queue: {total} | ✅ Completed: {completed} | ❌ Failed: {failed}
+                </Typography>
+
+                {/* Progress Bar */}
+                <LinearProgress
+                  variant="buffer"
+                  value={((completed + failed) / total) * 100} // Actual progress
+                  valueBuffer={((completed + failed) / total) * 100} // Target progress
+                  sx={{ marginBottom: 2, height: 30, borderRadius: 1 }}
+                  color="primary"
+                />
+              </Box>
               <Button variant="contained" sx={{ width: '100%' }} onClick={() => setConfirmOpen(true)}>
                 Clear Queue
               </Button>
@@ -204,6 +270,10 @@ export default function QueryResult() {
             </Button>
           )}
           <QueryResultRightPanel selectedFiles={filteredFiles} />
+
+          <Button variant="contained" sx={{ width: '100%' }} onClick={handleExport} disabled={filteredFiles.length === 0}>
+            Export
+          </Button>
         </Grid>
       </Grid>
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>

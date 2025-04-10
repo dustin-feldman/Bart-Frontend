@@ -28,7 +28,7 @@ const MainRoutes = {
   children: [
     {
       path: '/',
-      element: <DashboardDefault />
+      element: <QueryResult />
     },
     {
       path: '/edit/:id',
