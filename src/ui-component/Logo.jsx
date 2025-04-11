@@ -2,7 +2,7 @@
 import { useTheme } from '@mui/material/styles';
 import { Box } from '@mui/material';
 
-import logo from 'assets/images/logo.jpg';
+import logo from 'assets/images/pdf-logo.png';
 
 // ==============================|| LOGO SVG ||============================== //
 
